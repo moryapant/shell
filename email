@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Specify the path to your HTML file
+html_file="/path/to/your/file.html"
+
+# Check condition in HTML file (replace 'your_condition' with your actual condition)
+if grep -q 'your_condition' "$html_file"; then
+    # Extract email content from HTML file
+    email_body=$(cat "$html_file")
+
+    # Specify email details
+    to_email="recipient@example.com"
+    subject="Subject of your email"
+
+    # Send email using mail command
+    echo "$email_body" | mail -s "$subject" "$to_email"
+    echo "Email sent successfully!"
+else
+    echo "Condition not met. Email not sent."
+fi
