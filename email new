@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Specify the path to your HTML file
+html_file="/path/to/your/file.html"
+
+# Check if <td> contains the word "connected"
+if grep -q '<td>.*connected.*</td>' "$html_file"; then
+    # Extract the entire row (assuming it's within a <tr> tag)
+    matched_row=$(grep -o '<tr>.*</tr>' "$html_file")
+
+    # Specify email details
+    to_email="recipient@example.com"
+    subject="Subject of your email"
+
+    # Send email using mail command with content type set to HTML
+    {
+        echo "Content-type: text/html"
+        echo "Subject: $subject"
+        echo ""
+        echo "$matched_row"
+    } | /usr/sbin/sendmail -t "$to_email"
+    
+    echo "Email sent successfully!"
+else
+    echo "Condition not met. Email not sent."
+fi
