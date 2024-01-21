@@ -25,7 +25,7 @@ generate_html_table() {
 # Loop through each log file and send an email
 for log_file in "${LOG_FILES[@]}"; do
     HTML_CONTENT=$(generate_html_table "${log_file}")
-    echo "${HTML_CONTENT}" | mail -a "Content-type: text/html;" -s "Server Status Report - $(basename "${log_file}")" "${TO_EMAIL}"
+    (echo -e "Content-type: text/html\nSubject: Server Status Report - $(basename "${log_file}")\n"; echo "${HTML_CONTENT}") | /usr/sbin/sendmail -t "${TO_EMAIL}"
     echo "Email sent for $(basename "${log_file}")"
 done
 
