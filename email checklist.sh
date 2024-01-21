@@ -1,33 +1,33 @@
 #!/bin/bash
 
-# Set the email address to which the report will be sent
-TO_EMAIL="your@email.com"
+# Customize these variables
+folder="/path/to/log/files"  # Folder containing log files
+email_to="recipient@example.com"  # Email recipient
 
-# Array of log files for each server
-LOG_FILES=(
-    "/path/to/server1.log"
-    "/path/to/server2.log"
-    "/path/to/server3.log"
-    # Add more log files as needed
-)
+# Create HTML table header
+echo "<table border='1'>
+       <tr>
+         <th>Hostname</th>
+         <th>Server Status</th>
+       </tr>"
 
-# Function to generate HTML table for a given log file
-generate_html_table() {
-    local log_file="$1"
-    echo "<html><head><style>table {border-collapse: collapse; width: 100%;} th, td {border: 1px solid black; padding: 8px; text-align: left;} th {background-color: #f2f2f2;}</style></head><body><table>"
-    echo "<tr><th>Hostname</th><th>Server Status</th><th>Connection Status</th></tr>"
-    while read -r line; do
-        echo "<tr><td>${line}</td><td>Running</td><td>Connected</td></tr>"
-    done < "${log_file}"
-    echo "</table></body></html>"
-}
+# Process log files
+for file in "$folder"/*.log; do
+  hostname=$(grep -oP 'hostname\s*\=\s*\K\w+' "$file")  # Extract hostname
+  status=$(grep -oP 'status\s*\=\s*\K(connected|disconnected)' "$file")  # Extract status
 
-# Loop through each log file and send an email
-for log_file in "${LOG_FILES[@]}"; do
-    HTML_CONTENT=$(generate_html_table "${log_file}")
-    echo -e "${HTML_CONTENT}" | mail -s "Server Status Report - $(basename "${log_file}")" "${TO_EMAIL}"
-    echo "Email sent for $(basename "${log_file}")"
+  # Check if both hostname and status were found
+  if [[ -n $hostname && -n $status ]]; then
+    echo "<tr>
+            <td>$hostname</td>
+            <td>$status</td>
+          </tr>"
+  fi
 done
 
+echo "</table>"
 
-echo "All emails sent successfully!"
+# Send email using mailx or sendmail
+mailx -a "Content-Type: text/html" -s "Server Status Report" "$email_to" < <(cat)  # Using mailx
+# or
+# sendmail -t -i < <(cat)  # Using sendmail
